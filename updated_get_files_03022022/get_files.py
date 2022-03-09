@@ -8,12 +8,12 @@ qva_root = '\\\qva\qcom'
 # file_list = []
 
 
-def export_path_param(excelBook:str, excelSheet:str, excelHeader:str, outBatchFileName:str, exception_file:str):
-    mr_list = read_excel_param(excelBook, excelSheet, excelHeader, exception_file)
-    write_batch_file(outBatchFileName, mr_list)
+def export_path_param(excelBook:str, excelSheet:str, excelHeader:str, outBatchFile:str, exceptionFile:str):
+    mr_list = read_excel_param(excelBook, excelSheet, excelHeader, exceptionFile)
+    write_batch_file(outBatchFile, mr_list)
 
 
-def read_excel_param(excelBook: str, excelSheet:str, excelHeader:str, exception_file:str):
+def read_excel_param(excelBook: str, excelSheet:str, excelHeader:str, exceptionFile:str):
     print('**** Processing Excel File ****')
 
     excel = pd.read_excel(open(excelBook, 'rb'),sheet_name=excelSheet)  
@@ -30,21 +30,22 @@ def read_excel_param(excelBook: str, excelSheet:str, excelHeader:str, exception_
         else:
             excp_list.append(row)
 
-    with open(exception_file, 'w') as ex:
+    with open(exceptionFile, 'w') as ex:
         for i in excp_list:
             ex.write(str(i))
             ex.write('\n')
 
     return sorted(list(set(file_list)))
 
-def write_batch_file(outBatchFileName:str, mr_list:str):
-    with open(outBatchFileName, 'w') as wf:
+def write_batch_file(outBatchFile:str, mr_list:str):
+    with open(outBatchFile, 'w') as wf:
         print('**** Writing to File ****')
         for i in mr_list:
-            # seg1, seg2 = i.split('\\')[-3:-1]
+            seg1, seg2 = i.split('\\')[-3:-1]
             # wf.write('echo n | xcopy /s /y "' + i + '" "\\\dsrc3\shared\qcomtest\{}\{}"'.format(seg1,seg2))
+            wf.write('echo n | xcopy /s /y "' + i + r'" "\\qqtc-oc2\nonprod-nlp02\qcomtest\{}\{}"'.format(seg1,seg2))
 
-            wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01a\tmp_uat' + '"')
+            # wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01a\tmp_uat' + '"')
             wf.write('\n')
     
     print('**** DONE Writing ****')
@@ -148,7 +149,7 @@ def mark_cxcel(excel:os.path):
 if __name__=='__main__':
     import time
     start_time = time.time()
-    fileName = '181_file_list.xlsx'
+    # fileName = '181_file_list.xlsx'
 
 
     # print('**** START @ {} ****'.format(start_time))
@@ -159,15 +160,22 @@ if __name__=='__main__':
 # ----------------------------------------------------------------------------------------------
 
 
+    # inputExcelBook = r'C:\Users\pwang\Desktop\New_15_UAT_FOR_5.1_FROM_DESTINY_03022022.xlsx'
+    # excelSheet = 'Sheet1'
+    # excelHeader = 'Production'
+    # outBatchFile = '15_uat_0302.bat' 
+    # exceptionFile =  '15_uat_0302_exception'
 
-    inputExcelBook = r'C:\Users\pwang\Desktop\New_15_UAT_FOR_5.1_FROM_DESTINY_03022022.xlsx'
+
+    inputExcelBook = r'C:\Users\pwang\Downloads\NLP__\nlp_baseline_eval\181_file_list.xlsx'
     excelSheet = 'Sheet1'
-    excelHeader = 'Production'
-    outBatchFileName = '15_uat_0302.bat' 
-    exception_file =  '15_uat_0302_exception'
+    excelHeader = 'Filename'
+    outBatchFile = '181_prod_0309.bat'
+    exceptionFile = '181_prod_0309_exception'
+    
 
     print('**** START @ {} ****'.format(start_time))
-    export_path_param(inputExcelBook, excelSheet, excelHeader, outBatchFileName, exception_file)
+    export_path_param(inputExcelBook, excelSheet, excelHeader, outBatchFile, exceptionFile)
     print('**** DONE @ {} ****'.format(time.time() - start_time))
 
 
