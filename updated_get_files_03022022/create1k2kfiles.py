@@ -1,3 +1,9 @@
+''' Randomly get files from \\qva\qcom pool took tramandously long time
+    and also does not verify if created path is valid or not.
+    Improved with glob library in other script
+'''
+
+
 import os
 import random
 from datetime import date
@@ -23,7 +29,7 @@ def getOneKFile():
     oneKList=set()
     
     while len(oneKList) < 100:
-        print(len(oneKList)) 
+        # print(len(oneKList)) 
 
         dir1, dir2 = str(random.choice(alist)), str(random.choice(alist)).zfill(2)
         rest = str(random.randrange(1,199)).zfill(2)
