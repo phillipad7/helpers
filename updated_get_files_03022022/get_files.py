@@ -8,13 +8,28 @@ qva_root = '\\\qva\qcom'
 # file_list = []
 
 
+insert_temp = r'''INSERT INTO [dbo].[MR_Status]
+           ([ClaimantID],[CaseID],[Status],[CreatedDate],[ModifiedDate],[FilePath],[ErrorMsg],[SID],[PageCount],[NLPStatus],[NLPInstanceID],[NLPRetry])
+	--VALUES(<ClaimantID, numeric(18,0),>,<CaseID, numeric(18,0),>,<Status, varchar(50),>,<CreatedDate, datetime,>,<ModifiedDate, datetime,>,<FilePath, varchar(300),>,<ErrorMsg, varchar(5000),>,<SID, varchar(100),>,<PageCount, int,>,<NLPStatus, datetime,>,<NLPInstanceID, varchar(200),>,<NLPRetry, smallint,>)
+	VALUES
+			({0},
+			{1},
+			'MRINDEX_COMPLETE',
+			GetDate(),--CreatedDate,
+			GetDate(),
+			'\\qqtc-oc2\nonprod-nlp02\qcomtest\{2}\{3}\{0}_{1}_M.pdf',
+			'Skipped',NULL,Null,Null,Null,Null)
+GO'''
+
+
+
 def export_path_param(excelBook:str, excelSheet:str, excelHeader:str, outBatchFile:str, exceptionFile:str):
     mr_list = read_excel_param(excelBook, excelSheet, excelHeader, exceptionFile)
     write_batch_file(outBatchFile, mr_list)
 
 
 def read_excel_param(excelBook: str, excelSheet:str, excelHeader:str, exceptionFile:str):
-    print('**** Processing Excel File ****')
+    print('**** {:22s} ****'.format('Processing Excel File'))
 
     excel = pd.read_excel(open(excelBook, 'rb'),sheet_name=excelSheet)  
     file_list = []
@@ -37,20 +52,43 @@ def read_excel_param(excelBook: str, excelSheet:str, excelHeader:str, exceptionF
 
     return sorted(list(set(file_list)))
 
+
 def write_batch_file(outBatchFile:str, mr_list:str):
     with open(outBatchFile, 'w') as wf:
-        print('**** Writing to File ****')
+        print('**** {:24s} ****'.format('Writing to File'))
         for i in mr_list:
-            seg1, seg2 = i.split('\\')[-3:-1]
-            # wf.write('echo n | xcopy /s /y "' + i + '" "\\\dsrc3\shared\qcomtest\{}\{}"'.format(seg1,seg2))
-            wf.write('echo n | xcopy /s /y "' + i + r'" "\\qqtc-oc2\nonprod-nlp02\qcomtest\{}\{}"'.format(seg1,seg2))
+            seg1, seg2, seg3 = i.split('\\')[-3:]
+            claimantID, caseID = seg3.split('_')[:2]
+            # print(seg1, seg2, seg3, claimantID, caseID, '/n')
 
-            # wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01a\tmp_uat' + '"')
+            '''
+            #### Write to batch copy to QQTC-OC2 ####
+            '''
+            # wf.write('echo n | xcopy /s /y "' + i + r'" "\\qva\nonprod-nlp-uat02\qcomtest\{}\{}"'.format(seg1,seg2))
+            # wf.write('echo n | xcopy /s /y "' + i + r'" "\\Devqva\devnlpshare\TEMP_50_"')
+            wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01b\temp_ann_err"')
+            
+            '''
+            ##### SQL Insert Script ####
+            '''
+            # wf.write(insert_temp.format(claimantID, caseID, seg1, seg2))
+
+
+
             wf.write('\n')
     
-    print('**** DONE Writing ****')
+    print('**** {:24s} ****'.format('DONE Writing'))
 
     
+
+'''
+add src and desc argument to identify source location to copy from and destination where will copy to.
+'''
+def write_batch_file_arg(outBatchFile:os.path, mr_list:str, src:os.path, desc:os.path):
+    pass
+
+
+
 
 
 
@@ -61,19 +99,20 @@ def write_batch_file(outBatchFile:str, mr_list:str):
 def export_path(fileName:str):
     mr_list = read_excel(fileName)
     with open('export_15_file_list.bat', 'w') as wf:
-        print('**** Writing to File ****')
+        print('**** {:20s} ****'.format('Writing to File'))
+
         for i in mr_list:
             seg1, seg2 = i.split('\\')[-3:-1]
             wf.write('echo n | xcopy /s /y "' + i + '" "\\\dsrc3\shared\qcomtest\{}\{}"'.format(seg1,seg2))
             # wf.write('echo n | xcopy /s /y "' + i + '" "\\\devqva\DevNLPShare\\temp"' )
             wf.write('\n')
     
-    print('**** DONE Writing ****')
+    print('**** {:20s} ****'.format('DONE Writing'))
 
 
 
 def read_excel(fileName: str):
-    print('**** Processing Excel File ****')
+    print('**** {:20s} ****'.format('Processing Excel File'))
 
     excel = pd.read_excel(open(fileName, 'rb'),sheet_name='Sheet1')  
     file_list = []
@@ -120,7 +159,7 @@ def clean_row(raw:str):
 '''
 raw = x.y
 '''
-def construct_file_path(raw:str):
+def construct_file_path(raw):
     claimantID, caseID = raw[0], raw[1]
     fileName = claimantID + '_' + caseID + '_M.pdf'
     raw = claimantID.zfill(6)
@@ -151,7 +190,6 @@ if __name__=='__main__':
     start_time = time.time()
     # fileName = '181_file_list.xlsx'
 
-
     # print('**** START @ {} ****'.format(start_time))
     # export_path(fileName)
     # print('**** DONE @ {} ****'.format(time.time() - start_time))
@@ -160,23 +198,38 @@ if __name__=='__main__':
 # ----------------------------------------------------------------------------------------------
 
 
-    # inputExcelBook = r'C:\Users\pwang\Desktop\New_15_UAT_FOR_5.1_FROM_DESTINY_03022022.xlsx'
-    # excelSheet = 'Sheet1'
-    # excelHeader = 'Production'
-    # outBatchFile = '15_uat_0302.bat' 
-    # exceptionFile =  '15_uat_0302_exception'
 
-
-    inputExcelBook = r'C:\Users\pwang\Downloads\NLP__\nlp_baseline_eval\181_file_list.xlsx'
+    inputExcelBook = r'C:\Users\pwang\Desktop\NLP5.2_UAT_20.xlsx'
     excelSheet = 'Sheet1'
-    excelHeader = 'Filename'
-    outBatchFile = '181_prod_0309.bat'
-    exceptionFile = '181_prod_0309_exception'
-    
+    excelHeader = 'Production'
+    outBatchFile = 'NLP5.2_UAT_20_batch_0418_TP.bat'
+    exceptionFile = 'NLP5.2_UAT_20_exception_0418'
+    # outBatchFile = 'NLP5.2_UAT_20_insert_0418.sql'
+    # exceptionFile = 'NLP5.2_UAT_20_insert_exception_0418'
 
-    print('**** START @ {} ****'.format(start_time))
+
+    # inputExcelBook = r'C:\Users\pwang\Desktop\50_dup_page_test_file.xlsx'
+    # outBatchFile = '50_dup_page_test_batch_0315.bat'
+    # exceptionFile = '50_dup_page_test_exception_0315'
+
+    # inputExcelBook = r'C:\Users\pwang\Desktop\all_annotation_error.xlsx'
+    # outBatchFile = 'all_prod_annotation_error_batch_0316.bat'
+    # exceptionFile = 'all_prod_annotation_exception_0316'
+
+
+
+    import datetime
+    ntime = datetime.datetime.now()    
+    print('-----  START @ {:30s}  -------------------------------------------------------\n'.format(str(ntime)))
+
     export_path_param(inputExcelBook, excelSheet, excelHeader, outBatchFile, exceptionFile)
-    print('**** DONE @ {} ****'.format(time.time() - start_time))
 
 
+    # for s in ['batch1','batch2','batch3','batch4']:
+    #     export_path_param(inputExcelBook, s, excelHeader, outBatchFile+'_{}'.format(s), exceptionFile+'_{}'.format(s))
+
+
+
+    print('\n-----  TOTAL {:30s} SECONDS --------------------------------------------------\n'.format(str(datetime.datetime.now() - ntime)))
+    print('-----  END @ {:30s}  ---------------------------------------------------------------\n'.format(str(datetime.datetime.now())))
 
