@@ -66,7 +66,8 @@ def write_batch_file(outBatchFile:str, mr_list:str):
             '''
             # wf.write('echo n | xcopy /s /y "' + i + r'" "\\qva\nonprod-nlp-uat02\qcomtest\{}\{}"'.format(seg1,seg2))
             # wf.write('echo n | xcopy /s /y "' + i + r'" "\\Devqva\devnlpshare\TEMP_50_"')
-            wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01b\temp_ann_err"')
+            wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01a\temp_181"')
+            # wf.write('echo n | xcopy /s /y "' + i + '" "'+ r'\\qqtc\nonprod-nlp01\devnlpapp01b\temp_ann_err"')
             
             '''
             ##### SQL Insert Script ####
@@ -95,45 +96,6 @@ def write_batch_file_arg(outBatchFile:os.path, mr_list:str, src:os.path, desc:os
 # ---------------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------------
-
-def export_path(fileName:str):
-    mr_list = read_excel(fileName)
-    with open('export_15_file_list.bat', 'w') as wf:
-        print('**** {:20s} ****'.format('Writing to File'))
-
-        for i in mr_list:
-            seg1, seg2 = i.split('\\')[-3:-1]
-            wf.write('echo n | xcopy /s /y "' + i + '" "\\\dsrc3\shared\qcomtest\{}\{}"'.format(seg1,seg2))
-            # wf.write('echo n | xcopy /s /y "' + i + '" "\\\devqva\DevNLPShare\\temp"' )
-            wf.write('\n')
-    
-    print('**** {:20s} ****'.format('DONE Writing'))
-
-
-
-def read_excel(fileName: str):
-    print('**** {:20s} ****'.format('Processing Excel File'))
-
-    excel = pd.read_excel(open(fileName, 'rb'),sheet_name='Sheet1')  
-    file_list = []
-    excp_list = []
-    for row in excel['Filename']:
-        isRow, row = clean_row(row)
-        if isRow:
-            fpath = construct_file_path(row)
-            if os.path.isfile(fpath):
-                file_list.append(fpath)
-            else:
-                excp_list.append(fpath)
-        else:
-            excp_list.append(row)
-
-    with open('exception_files.txt', 'w') as ex:
-        for i in excp_list:
-            ex.write(str(i))
-            ex.write('\n')
-
-    return sorted(list(set(file_list)))
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -167,7 +129,7 @@ def construct_file_path(raw):
     dir2 = raw[2:4]
     fpath = os.path.join(qva_root, dir1, dir2, fileName)
     return fpath
- 
+
 
 
 def mark_cxcel(excel:os.path):
@@ -197,13 +159,11 @@ if __name__=='__main__':
 
 # ----------------------------------------------------------------------------------------------
 
-
-
-    inputExcelBook = r'C:\Users\pwang\Desktop\NLP5.2_UAT_20.xlsx'
-    excelSheet = 'Sheet1'
-    excelHeader = 'Production'
-    outBatchFile = 'NLP5.2_UAT_20_batch_0418_TP.bat'
-    exceptionFile = 'NLP5.2_UAT_20_exception_0418'
+    # inputExcelBook = r'C:\Users\pwang\Desktop\NLP5.2_UAT_20.xlsx'
+    # excelSheet = 'Sheet1'
+    # excelHeader = 'Production'
+    # outBatchFile = 'NLP5.2_UAT_20_batch_0418_TP.bat'
+    # exceptionFile = 'NLP5.2_UAT_20_exception_0418'
     # outBatchFile = 'NLP5.2_UAT_20_insert_0418.sql'
     # exceptionFile = 'NLP5.2_UAT_20_insert_exception_0418'
 
@@ -216,6 +176,11 @@ if __name__=='__main__':
     # outBatchFile = 'all_prod_annotation_error_batch_0316.bat'
     # exceptionFile = 'all_prod_annotation_exception_0316'
 
+    inputExcelBook = r'C:\Users\pwang\Desktop\CODES\181_file_list.xlsx'
+    excelSheet = '182only'
+    excelHeader = 'filename'
+    outBatchFile = '182_perform_batch_0428.bat'
+    exceptionFile = '182_perform_exception_0428'
 
 
     import datetime
