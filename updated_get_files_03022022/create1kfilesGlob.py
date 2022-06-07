@@ -106,9 +106,9 @@ if __name__=='__main__':
     ntime = datetime.datetime.now()    
     print('-----  START @ {:24s}  -------------------------------------------------------\n'.format(str(ntime)))
     
-    batchFileName = 'sqa3kList_200'
-    sqlScriptName =  'sqa3kInsert_200'
-    numOfFiles = 200
+    batchFileName = 'sqa1kList'
+    sqlScriptName =  'sqa1kInsert'
+    numOfFiles = 1000
 
     getBatchFiles(batchFileName, sqlScriptName, numOfFiles)
 
