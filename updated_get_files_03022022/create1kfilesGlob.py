@@ -48,12 +48,12 @@ def getMrList(numOfFiles):
         #     print(i, os.stat(i).st_size)
 
         if len(fl) > 1:
-            # random.shuffle(fl)
             fl = sorted(fl, key= lambda x:os.stat(x).st_size)
-            mrlist.add(getFileParts(fl[0]))
-            mrlist.add(getFileParts(fl[1]))
+            if os.stat(fl[1]).st_size <630000000:
+                mrlist.add(getFileParts(fl[0]))
+                mrlist.add(getFileParts(fl[1]))
 
-        print(datetime.datetime.now(), i, j, len(fl))
+        print(datetime.datetime.now(), i, j, len(fl), len(mrlist))
 
 
 
@@ -106,8 +106,8 @@ if __name__=='__main__':
     ntime = datetime.datetime.now()    
     print('-----  START @ {:24s}  -------------------------------------------------------\n'.format(str(ntime)))
     
-    batchFileName = 'sqa1kList'
-    sqlScriptName =  'sqa1kInsert'
+    batchFileName = 'sqa1kList_600'
+    sqlScriptName =  'sqa1kInsert_600'
     numOfFiles = 1000
 
     getBatchFiles(batchFileName, sqlScriptName, numOfFiles)

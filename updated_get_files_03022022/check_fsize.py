@@ -35,7 +35,6 @@ def sortFileBySize(numOfFiles, inputFile):
         fl = [re.split('\s|"', i)[7] if os.stat(re.split('\s|"', i)[7]).st_size <630000000 else '' for i in fl]
 
         # fl = [re.split('\s|"', i)[7] for i in fl]
-
         # fl = [Path(re.split('\s|"', i)[7]) for i in fl][:10]
         # fl = sorted(fl, key=lambda x: os.stat(x).st_size, reverse=True)
 
@@ -92,12 +91,12 @@ if __name__=='__main__':
     ntime = datetime.now()    
     print('-----  START @ {:24s}  -------------------------------------------------------\n'.format(str(ntime)))
     
-    batchFileName = 'sqa3kList_600M_add200file'
-    sqlScriptName =  'sqa3kInsert_600M_add200file'
+    batchFileName = 'sqa1kList_600M_add200file'
+    sqlScriptName =  'sqa1kInsert_600M_add200file'
     numOfFiles = 200
 
     # fname = r'C:\Users\pwang\Downloads\helpers\sqa3kList_04_11_copy.bat'
-    fname = r'C:\Users\pwang\Downloads\helpers\sqa3kList_200_04_13.bat'
+    fname = r'C:\Users\pwang\Downloads\helpers\sqa1kList_06_07.bat'
     regenBatchFiles(batchFileName, sqlScriptName, numOfFiles, fname)
 
   
